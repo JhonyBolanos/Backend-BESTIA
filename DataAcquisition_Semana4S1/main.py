@@ -1,4 +1,12 @@
-import uvicorn
-from api.endpoints import app
+from fastapi import FastAPI
 
-uvicorn.run(app, host= "0.0.0.0", port = 8001)
+from db.config import Base, engine
+from api.endpoints.readings import router as readings_router
+
+app = FastAPI()
+
+app.include_router(readings_router)
+
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
