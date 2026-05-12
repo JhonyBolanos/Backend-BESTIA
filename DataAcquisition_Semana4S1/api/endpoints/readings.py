@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from datetime import datetime
 
 from db.config import SessionLocal
-from model.models import Reading
-from entity.entities import ReadingTable
+from model.reading_model import Reading
+from entity.reading_entity import ReadingTable
 
 router = APIRouter()
 
