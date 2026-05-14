@@ -3,6 +3,7 @@ from datetime import datetime
 
 from db.config import SessionLocal
 from model.reading_model import Reading
+from model.reading_model import OpenRoomRequest
 from entity.reading_entity import ReadingTable
 
 router = APIRouter()
@@ -68,4 +69,54 @@ async def receive_batch(batch: list[Reading]):
 
     return {
         "message": "Batch saved"
+    }
+
+@router.get("/readings")
+async def get_readings():
+    db = SessionLocal()
+
+    readings = db.query(ReadingTable).order_by(ReadingTable.id.desc()).all()
+
+    result = []
+    for r in readings:
+        result.append({
+            "id": r.id,
+            "clave": r.clave,
+            "acceso": r.acceso,
+            "timestamp": r.timestamp.isoformat() if r.timestamp else None,
+            "espacio": r.espacio
+        })
+
+    db.close()
+
+    return result
+
+
+#AQUI SE HACE LA LOGICA PARA QUE SE MUESTREN LOS DATOS EN EL FRONT Y SE PUEDA ABRIR UNA SALA SIENDO ADMINd
+
+
+
+@router.post("/admin/open-room")
+async def open_room(request: OpenRoomRequest):
+    db = SessionLocal()
+
+    reading_to_save = ReadingTable(
+        clave="",
+        acceso="valido",
+        timestamp=datetime.now(),
+        espacio=request.espacio
+    )
+
+    db.add(reading_to_save)
+    db.commit()
+    db.refresh(reading_to_save)
+    db.close()
+
+    return {
+        "message": "Sala abierta manualmente",
+        "id": reading_to_save.id,
+        "clave": reading_to_save.clave,
+        "acceso": reading_to_save.acceso,
+        "timestamp": reading_to_save.timestamp.isoformat(),
+        "espacio": reading_to_save.espacio
     }

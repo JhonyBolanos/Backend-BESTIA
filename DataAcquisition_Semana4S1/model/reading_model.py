@@ -5,3 +5,7 @@ class Reading(BaseModel):
     acceso: str
     timestamp: int
     espacio: str
+
+
+class OpenRoomRequest(BaseModel):
+    espacio: str
